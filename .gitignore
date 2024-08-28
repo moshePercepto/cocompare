@@ -1,0 +1,20 @@
+# Ignore the .gitignore file itself
+.gitignore
+
+# Ignore Python bytecode
+*.pyc
+__pycache__/
+
+# Ignore environment directories
+env/
+venv/
+.venv/
+
+# Ignore OS generated files
+.DS_Store
+Thumbs.db
+
+# Ignore logs and temporary files
+*.log
+*.tmp
+/.idea
