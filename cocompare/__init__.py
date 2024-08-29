@@ -1,2 +1,2 @@
 from tnd import Tnd
-from ogi import Ogi
+from ogi import OgiLoader
