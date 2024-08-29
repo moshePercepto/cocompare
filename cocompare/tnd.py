@@ -1,7 +1,4 @@
 import os
-
-from overrides import overrides
-
 from image_model import TndImage
 from helpers import read_json, get_analysis
 from base_model import BaseModel
@@ -64,19 +61,19 @@ class TndModel(BaseModel):
         annotations = []
         for file_name in self.images_list:
             new_ann = {'thermal_name': file_name}
-            for pred in self.pred_list:
-                if file_name == pred['thermal_name']:
+            for pred_ann in self.pred_list:
+                if file_name == pred_ann['thermal_name']:
                     new_ann.update({
-                        'rgb_name': pred['rgb_name'],
-                        'width': pred['width'],
-                        'height': pred['height'],
-                        'pred_bboxes': pred['bboxes']
+                        'rgb_name': pred_ann['rgb_name'],
+                        'width': pred_ann['width'],
+                        'height': pred_ann['height'],
+                        'pred_bboxes': pred_ann['bboxes']
                     })
-                    self.pred_count += len(pred['bboxes'])
-            for gt in self.gt_list:
-                if file_name == gt['file_name']:
-                    new_ann.update({'gt_bboxes': gt['bboxes']})
-                    self.gt_count += len(gt['bboxes'])
+                    self.pred_count += len(pred_ann['bboxes'])
+            for gt_ann in self.gt_list:
+                if file_name == gt_ann['file_name']:
+                    new_ann.update({'gt_bboxes': gt_ann['bboxes']})
+                    self.gt_count += len(gt_ann['bboxes'])
             annotations.append(new_ann)
         return annotations
 

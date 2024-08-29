@@ -28,10 +28,6 @@ class OgiLoader:
         return {re_scene_name(name): data for name, data in pred_scenes_data['scenes'].items()}
 
     def build_scenes(self, gt_scenes, pred_data):
-        def get_scene_images(scene_name):
-            images_path = os.path.join(self.scenes_path, scene_name, 'images')
-            return [image for image in os.listdir(images_path) if 'fuse' not in image]
-
         def get_coco_path(scene_name):
             for file_name in os.listdir(os.path.join(self.scenes_path, scene_name)):
                 if os.path.splitext(file_name)[-1] in ('.json', '.JSON'):
@@ -68,18 +64,18 @@ class OgiModel(BaseModel):
         print(self.name)
         for file_name in self.images_list:
             new_ann = {'file_name': file_name}
-            for pred in self.pred_list:
-                if file_name == pred['file_name']:
+            for pred_ann in self.pred_list:
+                if file_name == pred_ann['file_name']:
                     new_ann.update({
-                        'width': pred['width'],
-                        'height': pred['height'],
-                        'pred_bboxes': pred['bboxes']
+                        'width': pred_ann['width'],
+                        'height': pred_ann['height'],
+                        'pred_bboxes': pred_ann['bboxes']
                     })
-                    self.pred_count += len(pred['bboxes'])
-            for gt in self.gt_list:
-                if file_name == gt['file_name']:
-                    new_ann.update({'gt_bboxes': gt['bboxes']})
-                    self.gt_count += len(gt['bboxes'])
+                    self.pred_count += len(pred_ann['bboxes'])
+            for gt_ann in self.gt_list:
+                if file_name == gt_ann['file_name']:
+                    new_ann.update({'gt_bboxes': gt_ann['bboxes']})
+                    self.gt_count += len(gt_ann['bboxes'])
             annotations.append(new_ann)
         # print('\n', self.name, '\n', annotations)
         return annotations

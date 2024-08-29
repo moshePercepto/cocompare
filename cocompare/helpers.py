@@ -35,12 +35,6 @@ def re_scene_name(name):
 
 
 def extract_cocos(datas):
-    # for data in datas:
-    #
-    #     for a in data['annotations']:
-    #         if a['bbox']:
-    #             print(a['image_id'])
-
     return [{
         'file_name': image['file_name'],
         'width': image['width'],

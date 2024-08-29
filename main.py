@@ -1,3 +1,3 @@
-import cocompare as cm
-
-tnd = cm.Tnd()
+# import cocompare as cm
+#
+# tnd = cm.TndLoader()

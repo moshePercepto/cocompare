@@ -54,7 +54,6 @@ class BaseImageModel:
             row = [self.calc_iou(gt_bbox, TndImage.bbox2pt(pred_bbox), self.manager.th) for pred_bbox in self.pred]
             self.metric.append(row)
 
-
     @staticmethod
     def calc_iou(gt_bbox: list, pred_bbox: list, th: float):
         x1_a, y1_a, x2_a, y2_a = gt_bbox

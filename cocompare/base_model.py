@@ -1,13 +1,11 @@
-from overrides import overrides
 from helpers import write_csv, read_jsons, extract_cocos, get_analysis
-# from image_model import ModelImage
 FIELDS_NAMES = ['rgb_name', 'thermal_name', 'GT', 'PREDICT', 'FN', 'FP', 'TP']
 
 
 class BaseModel:
     def __init__(self, name, th=0):
         self.name = name
-        self.images: list["ModelImage"] = []
+        self.images: list = []
         self.images_list: list[str] = []
         self.images_count = 0
         self.pred_list = []
