@@ -133,7 +133,7 @@ class Finish(StepFrame):
         self.label(text=f"Model: {self.manager.selected_model}")
         if self.manager.images_path.get():
             self.label(text=f"Images Path: {self.manager.images_path.get()}")
-        self.label(text=f"GT Path: {self.manager.gt_path.get()}")
+        self.label(text=f"GT Path: {self.manager.gt_paths.get()}")
         self.label(text=f"Prediction Path: {self.manager.pred_path.get()}")
         confirm_cb = ttk.Checkbutton(self.main_frame, text="Confirm everything is correct",
                                      variable=self.confirm_var, command=self.toggle_finish_button)
@@ -163,7 +163,7 @@ class LoadModel(StepFrame):
         self.configure_bottom_buttons()
 
     def back_to_model_picker(self):
-        [var.set('') for var in (self.manager.images_path, self.manager.gt_path, self.manager.pred_path)]
+        [var.set('') for var in (self.manager.images_path, self.manager.gt_paths, self.manager.pred_path)]
         self.manager.next_frame('ModelPicker')
 
     def configure_bottom_buttons(self):
@@ -217,7 +217,7 @@ class LoadOgi(LoadModel):
         self.create_files_uploader()
 
     def create_files_uploader(self):
-        self.gt_btn = self.add_entry(row=0, var=self.manager.gt_path, text='Load Gt Scenes', state='normal')
+        self.gt_btn = self.add_entry(row=0, var=self.manager.gt_paths, text='Load Gt Scenes', state='normal')
         self.pred_btn = self.add_entry(row=1, var=self.manager.pred_path, text='Load Pred Scenes', state='disable')
 
 
@@ -228,7 +228,7 @@ class LoadTnd(LoadModel):
 
     def create_files_uploader(self):
         self.add_entry(row=0, var=self.manager.images_path, text='Load Images', state='normal')
-        self.gt_btn = self.add_entry(row=1, var=self.manager.gt_path, text='Load gt', state='disable')
+        self.gt_btn = self.add_entry(row=1, var=self.manager.gt_paths, text='Load gt', state='disable')
         self.pred_btn = self.add_entry(row=2, var=self.manager.pred_path, text='Load Predict', state='disable')
 
 
