@@ -13,8 +13,6 @@ class OgiLoader(BaseLoader):
         gt_scenes = self.load_scenes_dir()
         pred_data = self.get_pred_data()
         self.children = self.build_scenes(gt_scenes, pred_data)
-        print('im here')
-        print(self.children)
         self.children_count = len(self.children)
 
     def build_scenes(self, gt_scenes, pred_data):
@@ -36,7 +34,6 @@ class OgiLoader(BaseLoader):
         return [folder for folder in os.listdir(self.gt) if os.path.isdir(os.path.join(self.gt, folder))]
 
     def get_pred_data(self):
-        print(self.pred)
         pred_scenes_data = read_json(self.pred)
         return {re_scene_name(name): data for name, data in pred_scenes_data['scenes'].items()}
 
@@ -84,7 +81,6 @@ class OgiLoader(BaseLoader):
     def __repr__(self):
         gt_count, pred_count, tp, fp, fn, th = self.collect_children_data()
         recall, precision, f1_score = get_analysis(tp, fp, fn)
-        print(f"{recall=}, {precision=}, {f1_score=}")
         return (f"{'-' * 100}\nOGI Summery:\n{gt_count=}, {pred_count=}, {tp=}, {fp=}, {fn=}\n"
                 f"{th=}, {precision=}, {recall=}, {f1_score=}\n{'-' * 100}")
 
@@ -110,7 +106,6 @@ class Ogi:
             # return self.extract_pred_from_csv(data)
         else:
             data = read_json(path)
-            print(data)
             return self.extract_pred_from_json(data)
 
     def extract_pred_from_json(self, data):
@@ -150,7 +145,6 @@ class Ogi:
         return images
 
     def build_annotations(self):
-        print(len(self.gt_list))
         annotations = []
         for file_name in self.names_list:
             new_ann = {'thermal_name': file_name, 'gt_bboxes': []}
@@ -212,7 +206,6 @@ class Ogi:
 
 class OgiImage:
     def __init__(self, manager, data):
-        print(data)
         self.manager: Ogi = manager
         self.name = data['thermal_name']
         self.width = data['width']
@@ -364,8 +357,8 @@ def ogi(args):
     ogi_loader.build()
     # for t in ogi_loader.children:
     #     print(t)
-    print(ogi_loader)
-    print(ogi_loader.collect_children_data())
+    # print(ogi_loader)
+    # print(ogi_loader.collect_children_data())
     # if args.save:
     #     ogi_loader.export_data(args.save)
 
