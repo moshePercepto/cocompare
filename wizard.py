@@ -1,13 +1,13 @@
 import os
 from tkinter import *
 from tkinter import ttk, filedialog, messagebox, colorchooser
-
+from BaseRoot import Root
 models = {'ogi': 'LoadOgi', 'tnd': 'LoadTnd'}
-width = 600
-height = 200
+
 IMAGES_EXTENSIONS = ['jpg', 'jpeg', 'bmp', 'png', 'gif']
 JSON_EXTENSIONS = ['json']
-
+WIDTH = 700
+HEIGHT = 200
 
 # helpers functions
 def filter_dir_files_by_ext(path: str, extensions: list[str]) -> list[str]:
@@ -15,34 +15,32 @@ def filter_dir_files_by_ext(path: str, extensions: list[str]) -> list[str]:
             if any(fn.lower().endswith(ext) for ext in extensions)]
 
 
-class Root(Tk):
+class Wizard(Root):
+    TITLE = 'Cocompare Wizard'
+
     def __init__(self):
-        super().__init__()
-        self.x_coordinate = int((self.winfo_screenwidth() / 2) - (width / 2))
-        self.y_coordinate = int((self.winfo_screenheight() / 3) - (height / 3))
-        self.title('Wizard')
-        self.geometry(f'{width}x{height}+{self.x_coordinate}+{self.y_coordinate}')
+        # self.app_manager = app_manager
+        super().__init__(self.TITLE, WIDTH, HEIGHT)
         self.resizable(width=False, height=False)
-
-
-class Wizard:
-    def __init__(self):
-        self.root: Root | None = None
         self.selected_model = None
         self.images_path = StringVar(name='images')
-        self.gt_path = StringVar(name='gt')
-        self.pred_path = StringVar(name='pred')
+        self.gt_paths = StringVar(name='gt')
+        self.pred_paths = StringVar(name='pred')
+        self.params: dict | None = None
         # frames vars for wizard window
         self.frames = None
         self.frame_stack = None
-
-    def start_wizard(self):
-        self.root = Root()
         self.set_wizard()
-        self.root.mainloop()
+        self.mainloop()
 
     def close_wizard(self):
-        self.root.destroy()
+        self.params = {
+            'model': self.selected_model,
+            'images': self.images_path.get(),
+            'gt': self.gt_paths.get(),
+            'pred': self.pred_paths.get()
+        }
+        self.destroy()
 
     def set_wizard(self):
         self.frames = dict()
@@ -91,16 +89,26 @@ class Style(ttk.Style):
 
 
 class StepFrame(ttk.Frame):
-    def __init__(self, manager, w=width, h=height, **kwargs, ):
-        super().__init__(manager.root, width=w, height=h, **kwargs)
+    def __init__(self, manager, w=WIDTH, h=HEIGHT, **kwargs, ):
+        super().__init__(width=w, height=h, **kwargs)
         self.manager = manager
         self.style = Style()
         self.main_frame = self.create_main_frame()
         self.bottom_frame = self.create_bottom_frame()
         self.next_btn = None
         self.configure(style=self.style.frame)
-        self.pack_propagate(False)
+        # self.pack_propagate(False)
+        self.pack_propagate(True)  # Allow the frame to resize based on its content
+        self.update_min_size()
+        # self.pack()
         self.place(x=0, y=0, relwidth=1, relheight=1)
+
+    def update_min_size(self):
+        # Force geometry update and set the minsize to content size
+        self.update_idletasks()  # Update the geometry manager to reflect widget sizes
+        width = self.winfo_reqwidth()
+        height = self.winfo_reqheight()
+        self.master.winfo_toplevel().minsize(width, height)
 
     def create_main_frame(self):
         f = ttk.Frame(self, style=self.style.frame)
@@ -127,6 +135,7 @@ class Finish(StepFrame):
         super().__init__(master)
         self.confirm_var = BooleanVar(value=False)
         self.configure_bottom_buttons()
+        self.update_min_size()
 
     def set_finish_frame(self):
         self.clear_frame()
@@ -134,7 +143,7 @@ class Finish(StepFrame):
         if self.manager.images_path.get():
             self.label(text=f"Images Path: {self.manager.images_path.get()}")
         self.label(text=f"GT Path: {self.manager.gt_paths.get()}")
-        self.label(text=f"Prediction Path: {self.manager.pred_path.get()}")
+        self.label(text=f"Prediction Path: {self.manager.pred_paths.get()}")
         confirm_cb = ttk.Checkbutton(self.main_frame, text="Confirm everything is correct",
                                      variable=self.confirm_var, command=self.toggle_finish_button)
         confirm_cb.pack(anchor=W, padx=10, pady=5)
@@ -163,7 +172,7 @@ class LoadModel(StepFrame):
         self.configure_bottom_buttons()
 
     def back_to_model_picker(self):
-        [var.set('') for var in (self.manager.images_path, self.manager.gt_paths, self.manager.pred_path)]
+        [var.set('') for var in (self.manager.images_path, self.manager.gt_paths, self.manager.pred_paths)]
         self.manager.next_frame('ModelPicker')
 
     def configure_bottom_buttons(self):
@@ -218,7 +227,7 @@ class LoadOgi(LoadModel):
 
     def create_files_uploader(self):
         self.gt_btn = self.add_entry(row=0, var=self.manager.gt_paths, text='Load Gt Scenes', state='normal')
-        self.pred_btn = self.add_entry(row=1, var=self.manager.pred_path, text='Load Pred Scenes', state='disable')
+        self.pred_btn = self.add_entry(row=1, var=self.manager.pred_paths, text='Load Pred Scenes', state='disable')
 
 
 class LoadTnd(LoadModel):
@@ -229,7 +238,7 @@ class LoadTnd(LoadModel):
     def create_files_uploader(self):
         self.add_entry(row=0, var=self.manager.images_path, text='Load Images', state='normal')
         self.gt_btn = self.add_entry(row=1, var=self.manager.gt_paths, text='Load gt', state='disable')
-        self.pred_btn = self.add_entry(row=2, var=self.manager.pred_path, text='Load Predict', state='disable')
+        self.pred_btn = self.add_entry(row=2, var=self.manager.pred_paths, text='Load Predict', state='disable')
 
 
 class ModelPicker(StepFrame):
@@ -268,4 +277,5 @@ class ModelPicker(StepFrame):
             messagebox.showerror(title='No Model Selected', message='Please select a Model')
 
 
-Wizard()
+if __name__ == '__main__':
+    Wizard()
