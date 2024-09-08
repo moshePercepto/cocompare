@@ -19,3 +19,6 @@ Thumbs.db
 *.tmp
 /.idea
 /data
+
+# Ignore csv files files
+*.csv
