@@ -411,8 +411,6 @@ class Slide(Label):
         iw, ih = self.image.width, self.image.height
         mw, mh = self.master.winfo_width(), self.master.winfo_height()
         mh = mh - self.viewer.bottom_frame.winfo_reqheight() - 20
-        print(f"{self.viewer.bottom_frame.winfo_reqheight()=}")
-        print(f"{ih=}({type(ih)}), {iw=}{type(iw)})")
         if iw > ih:
             ih = ih * (mw / iw)
             r = mh / ih if (ih / mh) > 1 else 1
@@ -435,7 +433,8 @@ class Slide(Label):
     def drew_annotations(self, img):
         gt_bboxes = self.current_image.gt
         pred_bboxes = self.current_image.pred
-
+        confidence_list = self.current_image.confidence
+        print(f"{confidence_list=}")
         def print_iou():
             for gt_bbox in self.current_image.gt:
                 gt_bbox = OgiImage.bbox2pt(gt_bbox)
@@ -444,7 +443,7 @@ class Slide(Label):
                     iou = self.current_image.calc_iou(gt_bbox, pred_bbox, 0.6)
                     print(f"{iou=}\n\t{gt_bbox=}\n\t{pred_bbox=}\n")
 
-        print_iou()
+        # print_iou()
 
         def drew_bboxes(bboxes, outline):
             draw = ImageDraw.Draw(img)
