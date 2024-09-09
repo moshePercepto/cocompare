@@ -88,8 +88,9 @@ class OgiLoader(BaseLoader):
 class Ogi:
     def __init__(self, name, gt_path, pred_data, th):
         self.name = name
+        print(self.name)
         self.gt_list = self.load_gt_data(gt_path)
-        self.pred_list = extract_coco(pred_data)
+        self.pred_list = extract_coco(pred_data, self.get_pred_bboxes)
         # fill the below with process_data method
         self.names_list = self.get_images_names()
         self.images_count = len(self.names_list)
@@ -121,15 +122,21 @@ class Ogi:
         if type(paths) is str:  # verify if paths is only one path, to be in a list.
             paths = [paths]
         cocos = read_jsons(paths)
-        return self.extract_coco(cocos)
+        return extract_cocos(cocos, self.get_gt_bboxes)
 
-    def extract_coco(self, cocos):
+    def extract_cocos(self, cocos, bboxes_callback):
         return [{
             'file_name': image['file_name'],
             'width': image['width'],
             'height': image['height'],
-            'bboxes': [a['bbox'] for a in coco['annotations'] if a['image_id'] == image['id']]
+            'bboxes': bboxes_callback(coco, image)
         } for coco in cocos for image in coco['images']]
+
+    def get_gt_bboxes(self, coco, image):
+        return [a['bbox'] for a in coco['annotations'] if a['image_id'] == image['id']]
+
+    def get_pred_bboxes(self, coco, image):
+        return [[a['bbox'], a['confidence']]for a in coco['annotations'] if a['image_id'] == image['id']]
 
     def get_images_names(self, ):
         set1 = {pred_ann['file_name'] for pred_ann in self.pred_list}
@@ -210,7 +217,9 @@ class OgiImage:
         self.name = data['thermal_name']
         self.width = data['width']
         self.height = data['height']
-        self.pred = self.normalize_bboxes(data['pred_bboxes'])
+        self.pred, self.confidence = self.get_bboxes_and_confidence_from_pred(data['pred_bboxes'])
+        print(self.name)
+        print(f"{self.pred}: {self.confidence=}")
         self.gt = self.normalize_bboxes(data['gt_bboxes'])
         self.metric = []
         self.tp = self.fp = self.fn = 0
@@ -308,6 +317,14 @@ class OgiImage:
             'f1': self.fn,
         }
 
+    def get_bboxes_and_confidence_from_pred(self, annotations):
+        bboxes_list = []
+        confidence_list = []
+        for bbox, confidence in annotations:
+            bboxes_list.append(self.normalize_bbox(bbox, self.width, self.height))
+            confidence_list.append(confidence)
+        return bboxes_list, confidence_list
+
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description="Handle file paths and options")
@@ -357,7 +374,7 @@ def ogi(args):
     ogi_loader.build()
     # for t in ogi_loader.children:
     #     print(t)
-    # print(ogi_loader)
+    print(ogi_loader)
     # print(ogi_loader.collect_children_data())
     # if args.save:
     #     ogi_loader.export_data(args.save)
@@ -365,7 +382,7 @@ def ogi(args):
 
 if __name__ == '__main__':
     args = parse_arguments()
-    pred = (r'C:\Users\MosheMendelovich\Documents\percepto\cocompare\data\ogi'
-            r'\predictions_Leaks_dataset_V5_13_prod_2024-09-04-12-46-08.json')
-    args.pred = pred
+    # pred = (r'C:\Users\MosheMendelovich\Documents\percepto\cocompare\data\ogi'
+    #         r'\predictions_Leaks_dataset_V5_13_prod_2024-09-04-12-46-08.json')
+    # args.pred = pred
     ogi(args)

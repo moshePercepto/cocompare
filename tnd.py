@@ -62,9 +62,11 @@ class Tnd:
         if type(paths) is str:  # verify if paths is only one path, to be in a list.
             paths = [paths]
         if is_csv(paths[0]):
+            print("go through csv")
             datas = read_csv(paths[0])
             return extract_gt_csv(datas)
         else:
+            print("go through json")
             datas = read_jsons(paths)
             return extract_cocos(datas)
 
@@ -263,12 +265,12 @@ if __name__ == '__main__':
         tnd_loader = TndLoader(model='tnd', gt=args.gt, pred=args.pred, th=args.th)
         tnd_loader.build()
 
-        if args.save:
-            tnd_loader.export_data(args.save)
-        else:
+        # if args.save:
+        #     tnd_loader.export_data(args.save)
+        # else:
             # tnd.print_data()
-            print(tnd_loader)
+        print(tnd_loader)
 
     args = parse_arguments()
-    tnd_ind(args)
+    # tnd_ind(args)
     tnd_gen(args)

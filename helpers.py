@@ -62,26 +62,28 @@ def extract_gt_csv(datas):
     } for d in datas]
 
 
-def extract_cocos(cocos):
+def extract_cocos(cocos, bboxes_callback=None):
+    return [extract_coco(coco, bboxes_callback if bboxes_callback else get_gt_bboxes) for coco in cocos][0]
+
+
+def extract_coco(coco, bboxes_callback):
     return [{
         'file_name': image['file_name'],
         'width': image['width'],
         'height': image['height'],
-        'bboxes': [a['bbox'] for a in coco['annotations'] if a['image_id'] == image['id']]
-    } for coco in cocos for image in coco['images']]
+        'bboxes': bboxes_callback(coco, image)
+    }for image in coco['images']]
 
 
-def extract_coco(data):
-    return [{
-        'file_name': image['file_name'],
-        'width': image['width'],
-        'height': image['height'],
-        'bboxes': [a['bbox'] for a in data['annotations'] if a['image_id'] == image['id']]
-    } for image in data['images']]
+def get_gt_bboxes(coco, image):
+    return [a['bbox'] for a in coco['annotations'] if a['image_id'] == image['id']]
+
+
+def get_pred_bboxes(coco, image):
+    return [[a['bbox'], a['confidence']]for a in coco['annotations'] if a['image_id'] == image['id']]
 
 
 def get_recall(tp, fn):
-    print(f"{tp}/({tp}+{fn}) =")
     return round(tp / (tp + fn), 2) if (tp + fn) else 0
 
 
