@@ -22,3 +22,8 @@ Thumbs.db
 
 # Ignore csv files files
 *.csv
+
+#ignore pyinstaller folders and files
+main.spec
+build/
+dist/
